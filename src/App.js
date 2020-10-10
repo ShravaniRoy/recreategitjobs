@@ -1,18 +1,36 @@
-import React from 'react';
-import useFetchJobs from './useFetchJobs';
-import {Container} from 'react-bootstrap'
+import React, { useState } from 'react';
+import useFetchJobs from './useFetchJobs'
+import { Container } from 'react-bootstrap'
+import Job from './Job'
+import JobsPagination from './JobsPagination';
 
 function App() {
-  const { jobs, loading, error } = useFetchJobs()
+  const [params, setParams] = useState({})
+  const [page, setPage] = useState(1)
+  const { jobs, loading, error, hasNextPage } = useFetchJobs(params, page)
+
+  function handleParamChange(e) {
+    const param = e.target.name
+    const value = e.target.value
+    setPage(1)
+    setParams(prevParams => {
+      return { ...prevParams, [param]: value }
+    })
+  }
+
   return (
-    <Container>
-      {loading && <h2>Loading...</h2>}
-      {error && <h2>Error!! Try refreshing the page...</h2>}
-      {jobs.length && 
-        <h3>{jobs.length}</h3>
-      }
+    <Container className="my-4">
+      <h1 className="mb-4">GitHub Jobs</h1>
+      
+      <JobsPagination page={page} setPage={setPage} hasNextPage={hasNextPage} />
+      {loading && <h1>Loading...</h1>}
+      {error && <h1>Error. Try Refreshing.</h1>}
+      {jobs.map(job => {
+        return <Job key={job.id} job={job} />
+      })}
+      <JobsPagination page={page} setPage={setPage} hasNextPage={hasNextPage} />
     </Container>
-  );
+  )
 }
 
 export default App;
